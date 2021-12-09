@@ -1,70 +1,141 @@
-# Getting Started with Create React App
+## 0: Start JSX
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+```jsx
+  return (
+    <div className="App">
+      <header className="App-header">
+        <h1>Wanted</h1>
+      </header>
+      <main>
+        <p>Posters will go here.</p>
+      </main>
+    </div>
+  );
+```
 
-## Available Scripts
+## 1: Get Bounty Data
 
-In the project directory, you can run:
+* make a fetch call to the API '/bounties' in a useEffect and print to the console
 
-### `npm start`
+```js
+  useEffect(()=>{
+    fetch('http://localhost:8000/bounties')
+    .then(response=>{
+      return response.json()
+    })
+    .then(foundBounties=>{
+      console.log(foundBounties)
+    })
+  })
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+* install and configure cors package in server to fix error
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```js
+const cors = require('cors')
+app.use(cors())
+```
 
-### `npm test`
+## 2. Build out posters.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+* Create a Poster component and import it to App.js
+* Render a poster in App for each bounty:
+    * store foundBounties in state so we have access to that list in the return
 
-### `npm run build`
+    ```js
+    function App() {
+        const [bounties, setBounties] = useState([])
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+        useEffect(()=>{
+            fetch('http://localhost:8000/bounties')
+            .then(response=>{
+                return response.json()
+            })
+            .then(foundBounties=>{
+                console.log(foundBounties)
+                setBounties(foundBounties)
+            })
+        })
+    ```
+    * Map the bounties to a list of Poster components that each receive a bounty prop.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    ```js
+    let posters = bounties.map(b=>{
+        return <Poster bounty={b} key={b.name}/>
+    })
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    return (
+        <div className="App">
+            <header className="App-header">
+                <h1>Wanted</h1>
+            </header>
+            <main>
+                {posters}
+            </main>
+        </div>
+    )
+    ```
+    * Build out Poster component
+    ```js
+    function Poster(props) {
+        let status = props.bounty.caught ? 'In Custody' : 'At Large'
+        return (
+            <div className="poster">
+                <h2>{status}</h2>
+                <h3>{props.bounty.name}</h3>
+                <h4>{props.bounty.reward}</h4>
+            </div>
+            )
+    }
 
-### `npm run eject`
+    export default Poster;
+    ```
+## 3: Build out Display
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+* Set up a 'current' state to hold a bounty to be displayed. Users will set the current bounty by clicking a "more" button on a poster.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```js
+  const [current, setCurrent] = useState({})
+```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+* Write a changeCurrent method in App.js and pass it to each poster:
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```js
+ const changeCurrent = (bounty) => {
+    setCurrent(bounty)
+  }
 
-## Learn More
+  let posters = bounties.map(b=>{
+    return <Poster bounty={b} key={b.name} changeCurrent={changeCurrent}/>
+  })
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+* Add a 'more' button to Poster component that changes the current bounty:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```js
+    <button onClick={()=>{props.changeCurrent(props.bounty)}}>More</button>
+```
 
-### Code Splitting
+* Import and render in App.js within header.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```js
+function Display(props) {
+    let display
+    if(props.bounty.name) {
+        display = (
+            <div className='showBounty'>
+                <h2>{props.bounty.name}</h2>
+                <h3>Wanted For: {props.bounty.wantedFor}</h3>
+                <p>Last Seen: {props.bounty.lastSeen?props.bounty.lastSeen:'Unknown'}</p>
+            </div>
+        )
+    } else {display = <p>Click "more" to see more about a bounty.</p>}
+    return (
+        <>
+            {display}
+        </>
+    )
+}
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+export default Display;
+```

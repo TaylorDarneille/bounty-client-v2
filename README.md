@@ -190,3 +190,38 @@ function Form() {
 
 export default Form
 ```
+
+New bounties should now be posting, but you'll have to refresh the page in order to see the new ones after submission.
+
+## 5. Refresh poster list after posting a new bounty
+
+* Refactor App so that the fetch call is in it's own function called `getBounties`.
+```js
+  useEffect(()=>{
+    getBounties()
+  }, [])
+
+  const getBounties = () => {
+    fetch('http://localhost:8000/bounties')
+    .then(response=>{
+      return response.json()
+    })
+    .then(foundBounties=>{
+      console.log(foundBounties)
+      setBounties(foundBounties)
+    })
+  }
+```
+* Pass down getBounties as a prop called 'refreshBounties' to the Form component, then call it after the post happens.
+```js
+        .then(postedBounty=>{
+            props.refreshBounties()
+            setNewBounty({
+                name:'',
+                wantedFor: '',
+                client: '',
+                reward: 100000,
+                captured:false
+            })
+        })
+```

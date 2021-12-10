@@ -8,7 +8,7 @@ function Form(props) {
         reward: 100000,
         captured:false
     })
-    
+
     const handleChange = (e) => {
         setNewBounty({...newBounty, [e.target.name]:e.target.value})
     }
@@ -33,6 +33,7 @@ function Form(props) {
         })
         .then(response=>response.json())
         .then(postedBounty=>{
+            props.refreshBounties()
             setNewBounty({
                 name:'',
                 wantedFor: '',

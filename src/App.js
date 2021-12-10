@@ -10,6 +10,10 @@ function App() {
   const [current, setCurrent] = useState({})
 
   useEffect(()=>{
+    getBounties()
+  }, [])
+
+  const getBounties = () => {
     fetch('http://localhost:8000/bounties')
     .then(response=>{
       return response.json()
@@ -18,7 +22,7 @@ function App() {
       console.log(foundBounties)
       setBounties(foundBounties)
     })
-  }, [])
+  }
 
   const changeCurrent = (bounty) => {
     setCurrent(bounty)
@@ -39,7 +43,7 @@ function App() {
         {posters}
       </section>
       <section className="App-header">
-        <Form />
+        <Form refreshBounties={getBounties}/>
       </section>
     </div>
   )
